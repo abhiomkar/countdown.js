@@ -134,6 +134,8 @@ function initLocalClocks() {
  */
 function moveSecondHands() {
   var containers = document.querySelectorAll('.bounce .seconds-container');
+  var audio = new Audio('./static/clock-tick.mp3');
+
   setInterval(function() {
     for (var i = 0; i < containers.length; i++) {
       if (containers[i].angle === undefined) {
@@ -144,6 +146,8 @@ function moveSecondHands() {
       containers[i].style.webkitTransform = 'rotateZ('+ containers[i].angle +'deg)';
       containers[i].style.transform = 'rotateZ('+ containers[i].angle +'deg)';
     }
+    audio.play();
+
   }, 1000);
   for (var i = 0; i < containers.length; i++) {
     // Add in a little delay to make them feel more natural
