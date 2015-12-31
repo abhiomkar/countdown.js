@@ -1,18 +1,39 @@
 /*
  *  Main function to set the clock times
  */
-(function() {
+
+var App = function() {
+  window.addEventListener('load', this.init.bind(this), false);
+}
+
+var AudioPlayer = function() {
+  this.init();
+}
+
+App.fn = App.prototype;
+
+App.fn.init = function() {
   // Initialise the locale-enabled clocks
-  initInternationalClocks();
+  // this.initInternationalClocks();
   // Initialise any local time clocks
-  initLocalClocks();
+  this.initLocalClocks();
   // Start the seconds container moving
-  moveSecondHands();
+  this.moveSecondHands();
   // Set the intial minute hand container transition, and then each subsequent step
-  setUpMinuteHands();
+  this.setUpMinuteHands();
   // Set Snow
-  initSnow();
-})();
+  this.initSnow();
+  // turn on the audio player
+  this.initAudioPlayer();
+
+  var $clock = document.querySelector('.clock');
+  $clock.className += " show";
+} 
+
+App.fn.initAudioPlayer = function() {
+    this.audioPlayer = new AudioPlayer();
+    this.audioPlayer.play('./static/sounds/tick-tock.wav', {loop: true});
+}
 
 /*
  *  Set up an entry for each locale of clock we want to use
@@ -94,7 +115,7 @@ function initInternationalClocks() {
 /*
  * Starts any clocks using the user's local time
  */
-function initLocalClocks() {
+App.fn.initLocalClocks = function() {
   // Get the local time using JS
   var date = new Date;
   var seconds = date.getSeconds();
@@ -132,10 +153,9 @@ function initLocalClocks() {
 /*
  * Move the second containers
  */
-function moveSecondHands() {
+App.fn.moveSecondHands = function() {
   var containers = document.querySelectorAll('.bounce .seconds-container');
-  var audio = new Audio('./static/clock-tick.mp3');
-
+  var that = this;
   setInterval(function() {
     for (var i = 0; i < containers.length; i++) {
       if (containers[i].angle === undefined) {
@@ -146,7 +166,7 @@ function moveSecondHands() {
       containers[i].style.webkitTransform = 'rotateZ('+ containers[i].angle +'deg)';
       containers[i].style.transform = 'rotateZ('+ containers[i].angle +'deg)';
     }
-    audio.play();
+    that.audioPlayer.play('./static/sounds/heavy-clock-tick.mp3');
 
   }, 1000);
   for (var i = 0; i < containers.length; i++) {
@@ -159,7 +179,7 @@ function moveSecondHands() {
 /*
  * Set a timeout for the first minute hand movement (less than 1 minute), then rotate it every minute after that
  */
-function setUpMinuteHands() {
+App.fn.setUpMinuteHands = function() {
   // More tricky, this needs to move the minute hand when the second hand hits zero
   var containers = document.querySelectorAll('.minutes-container');
   var secondAngle = containers[containers.length - 1].getAttribute('data-second-angle');
@@ -177,7 +197,7 @@ function setUpMinuteHands() {
 /*
  * Do the first minute's rotation, then move every 60 seconds after
  */
-function moveMinuteHands(containers) {
+App.fn.moveMinuteHands = function(containers) {
   for (var i = 0; i < containers.length; i++) {
     containers[i].style.webkitTransform = 'rotateZ(6deg)';
     containers[i].style.transform = 'rotateZ(6deg)';
@@ -200,7 +220,7 @@ function moveMinuteHands(containers) {
  * Let's add some snow
  */
 
-function initSnow() {
+App.fn.initSnow = function() {
   //canvas init
   var canvas = document.getElementById("snow");
   var ctx = canvas.getContext("2d");
@@ -286,3 +306,57 @@ function initSnow() {
   setInterval(draw, 33);
 }
 
+AudioPlayer.fn = AudioPlayer.prototype;
+
+AudioPlayer.fn.init = function() {
+  var that = this;
+  this._cache = {};
+  try {
+    // Fix up for prefixing
+    window.AudioContext = window.AudioContext||window.webkitAudioContext;
+    that.context = new AudioContext();
+  }
+  catch(e) {
+    alert('Web Audio API is not supported in this browser');
+  }
+};
+
+AudioPlayer.fn._load = function(url, callback) {
+  var request = new XMLHttpRequest();
+  var that = this;
+  request.open('GET', url, true);
+  request.responseType = 'arraybuffer';
+
+  return request;
+};
+
+AudioPlayer.fn.play = function(url, options) {
+  var that = this;
+  var onError = function() {};
+  var request;
+  var options = options || {};
+
+  if (this._cache[url]) {
+    var source = that.context.createBufferSource();
+    source.buffer = this._cache[url].buffer;
+    source.connect(this.context.destination);
+    if (options.loop) source.loop = true;
+    source.start(0);
+  }
+  else {
+      request = this._load(url);
+      request.onload = function() {
+        that.context.decodeAudioData(request.response, function(buffer) {
+          var source = that.context.createBufferSource();
+          source.buffer = buffer;
+          that._cache[url] = source;
+          source.connect(that.context.destination);
+          if (options.loop) source.loop = true;
+          source.start(0);
+        }, onError);
+      }
+      request.send();
+  }
+};
+
+var app = new App();
