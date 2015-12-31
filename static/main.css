@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  font-family: MyriadPro-Regular, 'Myriad Pro Regular', MyriadPro, 'Myriad Pro', Helvetica, Arial, sans-serif;
 }
 
 .demo-container.clocks {
@@ -16,6 +17,26 @@ canvas#snow {
 	position: fixed;
 	top: 0;
 }
+
+.glitter-mask {
+   color: gold;  /* Fallback: assume this color ON TOP of image */
+   background: url(./images/glitter-mask.png) no-repeat;
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
+}
+
+.countdown {
+    font-size: 8em;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    top: 43%;
+    display: none;
+    width: 100%;
+    text-align: center;
+}
+
+.countdown.show { display: block; }
 
 .clock {
   border-radius: 50%;

@@ -2,6 +2,8 @@
  *  Main function to set the clock times
  */
 
+var NEW_YEAR_MOMENT = moment("2016-01-01");
+
 var App = function() {
   window.addEventListener('load', this.init.bind(this), false);
 }
@@ -13,6 +15,8 @@ var AudioPlayer = function() {
 App.fn = App.prototype;
 
 App.fn.init = function() {
+  // cache dom elements
+  this.initDomCache();
   // Initialise the locale-enabled clocks
   // this.initInternationalClocks();
   // Initialise any local time clocks
@@ -30,9 +34,33 @@ App.fn.init = function() {
   $clock.className += " show";
 } 
 
+App.fn.initDomCache = function() {
+  this.$app = document.querySelector(".app");
+  this.$countdown = this.$app.querySelector(".countdown");
+}
+
 App.fn.initAudioPlayer = function() {
     this.audioPlayer = new AudioPlayer();
     this.audioPlayer.play('./static/sounds/tick-tock.wav', {loop: true});
+}
+
+App.fn.updateCountdown = function() {
+  var countDownShowing = false;
+  var that = this;
+
+  var secondsLeft = NEW_YEAR_MOMENT.diff(moment(), 'seconds');
+
+  if (secondsLeft <= 0) {
+    that.$countdown.classList.remove("show");
+    countDownShowing = false;
+  }
+  else if (secondsLeft <= 60) {
+    if (!countDownShowing) {
+        that.$countdown.classList.add("show");
+        countDownShowing = true;
+    }
+    that.$countdown.innerHTML = secondsLeft;
+  }
 }
 
 /*
@@ -167,7 +195,7 @@ App.fn.moveSecondHands = function() {
       containers[i].style.transform = 'rotateZ('+ containers[i].angle +'deg)';
     }
     that.audioPlayer.play('./static/sounds/heavy-clock-tick.mp3');
-
+    that.updateCountdown();
   }, 1000);
   for (var i = 0; i < containers.length; i++) {
     // Add in a little delay to make them feel more natural
