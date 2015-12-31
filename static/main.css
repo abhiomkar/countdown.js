@@ -38,6 +38,21 @@ canvas#snow {
 
 .countdown.show { display: block; }
 
+.time-remaining {
+    font-size: 2em;
+    font-weight: bold;
+    width: 100%;
+    text-align: center;
+    color: #353535;
+    display: none;
+    position: absolute;
+    bottom: 8%;
+}
+
+.time-remaining.show {
+  display: block;
+}
+
 .clock {
   border-radius: 50%;
   background: -webkit-radial-gradient(#000000, #000000 0.1em, #ffffff 0.1em, #ffffff), #fff;

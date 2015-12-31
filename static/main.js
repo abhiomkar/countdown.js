@@ -3,6 +3,7 @@
  */
 
 var NEW_YEAR_MOMENT = moment("2016-01-01");
+moment.locale('en');
 
 var App = function() {
   window.addEventListener('load', this.init.bind(this), false);
@@ -37,6 +38,7 @@ App.fn.init = function() {
 App.fn.initDomCache = function() {
   this.$app = document.querySelector(".app");
   this.$countdown = this.$app.querySelector(".countdown");
+  this.$timeRemaining = this.$app.querySelector(".time-remaining");
 }
 
 App.fn.initAudioPlayer = function() {
@@ -52,6 +54,7 @@ App.fn.updateCountdown = function() {
 
   if (secondsLeft <= 0) {
     that.$countdown.classList.remove("show");
+    that.$timeRemaining.classList.remove("show");
     countDownShowing = false;
   }
   else if (secondsLeft <= 60) {
@@ -59,7 +62,11 @@ App.fn.updateCountdown = function() {
         that.$countdown.classList.add("show");
         countDownShowing = true;
     }
+    that.$timeRemaining.classList.remove("show");
     that.$countdown.innerHTML = secondsLeft;
+  }
+  else {
+    that.$timeRemaining.innerHTML = moment("2016-01-01").fromNow();
   }
 }
 
