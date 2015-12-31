@@ -3,7 +3,7 @@
  */
 
 var NEW_YEAR_MOMENT = moment("2016-01-01");
-// var NEW_YEAR_MOMENT = moment().add(5, 's');
+var NEW_YEAR_MOMENT = moment().add(10, 's');
 moment.locale('en');
 
 var App = function() {
@@ -48,6 +48,7 @@ App.fn.initDomCache = function() {
 App.fn.initAudioPlayer = function() {
     this.audioPlayer = new AudioPlayer();
     this.audioPlayer.play('./static/sounds/tick-tock.wav', {loop: true});
+    this.audioPlayer.play('./static/sounds/kygo.mp3', {loop: true, startAt: 30});
 }
 
 App.fn.updateCountdown = function() {
@@ -208,11 +209,15 @@ App.fn.moveSecondHands = function() {
       containers[i].style.webkitTransform = 'rotateZ('+ containers[i].angle +'deg)';
       containers[i].style.transform = 'rotateZ('+ containers[i].angle +'deg)';
     }
-    that.audioPlayer.play('./static/sounds/heavy-clock-tick.mp3');
+    if (secondsLeft > 0) {
+      that.audioPlayer.play('./static/sounds/heavy-clock-tick.mp3');
+    }
     secondsLeft = that.updateCountdown();
     if (secondsLeft === 0) {
       that.$clock.classList.add("zoomOut", "animated");
       that.$endMessage.classList.add("show", "zoomInDown", "animated");
+      that.audioPlayer.stop();
+      that.audioPlayer.play('./static/sounds/cant-feel-my-face.mp3', {loop: true, startAt: 45});
     }
   }, 1000);
   for (var i = 0; i < containers.length; i++) {
@@ -376,6 +381,20 @@ AudioPlayer.fn._load = function(url, callback) {
   return request;
 };
 
+AudioPlayer.fn.stop = function(url) {
+  var that = this;
+
+  if (url) {
+    this._cache[url] && this._cache[url].stop();
+  }
+  else {
+    // stop all audio
+    Object.keys(this._cache).forEach(function(k) { 
+      that._cache[k].stop(); 
+    });
+  }
+};
+
 AudioPlayer.fn.play = function(url, options) {
   var that = this;
   var onError = function() {};
@@ -387,7 +406,7 @@ AudioPlayer.fn.play = function(url, options) {
     source.buffer = this._cache[url].buffer;
     source.connect(this.context.destination);
     if (options.loop) source.loop = true;
-    source.start(0);
+    source.start(options.startAt || 0);
   }
   else {
       request = this._load(url);
@@ -398,7 +417,7 @@ AudioPlayer.fn.play = function(url, options) {
           that._cache[url] = source;
           source.connect(that.context.destination);
           if (options.loop) source.loop = true;
-          source.start(0);
+          source.start(options.startAt || 0);
         }, onError);
       }
       request.send();
