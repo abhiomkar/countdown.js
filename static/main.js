@@ -3,6 +3,7 @@
  */
 
 var NEW_YEAR_MOMENT = moment("2016-01-01");
+// var NEW_YEAR_MOMENT = moment().add(5, 's');
 moment.locale('en');
 
 var App = function() {
@@ -39,6 +40,9 @@ App.fn.initDomCache = function() {
   this.$app = document.querySelector(".app");
   this.$countdown = this.$app.querySelector(".countdown");
   this.$timeRemaining = this.$app.querySelector(".time-remaining");
+  this.$clock = this.$app.querySelector(".clock");
+  this.$clocks = this.$app.querySelector(".clocks");
+  this.$endMessage = this.$app.querySelector(".end-message");
 }
 
 App.fn.initAudioPlayer = function() {
@@ -68,6 +72,8 @@ App.fn.updateCountdown = function() {
   else {
     that.$timeRemaining.innerHTML = moment("2016-01-01").fromNow();
   }
+
+  return secondsLeft;
 }
 
 /*
@@ -191,6 +197,7 @@ App.fn.initLocalClocks = function() {
 App.fn.moveSecondHands = function() {
   var containers = document.querySelectorAll('.bounce .seconds-container');
   var that = this;
+  var secondsLeft;
   setInterval(function() {
     for (var i = 0; i < containers.length; i++) {
       if (containers[i].angle === undefined) {
@@ -202,7 +209,11 @@ App.fn.moveSecondHands = function() {
       containers[i].style.transform = 'rotateZ('+ containers[i].angle +'deg)';
     }
     that.audioPlayer.play('./static/sounds/heavy-clock-tick.mp3');
-    that.updateCountdown();
+    secondsLeft = that.updateCountdown();
+    if (secondsLeft === 0) {
+      that.$clock.classList.add("zoomOut", "animated");
+      that.$endMessage.classList.add("show", "zoomInDown", "animated");
+    }
   }, 1000);
   for (var i = 0; i < containers.length; i++) {
     // Add in a little delay to make them feel more natural

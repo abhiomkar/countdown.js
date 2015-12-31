@@ -13,6 +13,20 @@ body {
   text-align: center;
 }
 
+.end-message {
+  display: none;
+  font-size: 4em;
+  font-family: 'Berkshire Swash', cursive;
+}
+
+.end-message.show {
+  display: block;
+  position: absolute;
+  top: 40%;
+  text-align: center;
+  width: 100%;
+}
+
 canvas#snow {
 	position: fixed;
 	top: 0;
